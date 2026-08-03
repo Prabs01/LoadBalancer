@@ -1,0 +1,22 @@
+mode: 1
+listen: ":8080"
+balancer: round_robin
+timeout:
+  read: 5
+  dial: 2
+  write: 5
+  idle: 30
+health:
+  passive:
+    fall: 3
+    cooldown: 60
+routes:
+  - match:
+      path_prefix: /api
+    pool: public
+pools:
+  public:
+    - addr: "10.0.0.1:80"
+      weight: 3
+    - addr: "10.0.0.2:80"
+      weight: 1
