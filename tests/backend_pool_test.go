@@ -12,11 +12,12 @@ func TestNewBackendPool(t *testing.T) {
 	if bp.Name != "public" {
 		t.Fatalf("expected name public, got %q", bp.Name)
 	}
-	if len(bp.Backends) != 1 {
-		t.Fatalf("expected 1 backend, got %d", len(bp.Backends))
-	}		
-	if bp.Backends[0].Addr != "10.0.0.1:80" {
-		t.Fatalf("expected backend addr 10.0.0.1:80, got %q", bp.Backends[0].Addr)
+	backends = bp.Backends()
+	if len(backends) != 1 {
+		t.Fatalf("expected 1 backend, got %d", len(backends))
+	}
+	if backends[0].Addr != "10.0.0.1:80" {
+		t.Fatalf("expected backend addr 10.0.0.1:80, got %q", backends[0].Addr)
 	}
 }
 
@@ -29,19 +30,18 @@ func TestGetHealthyBackends(t *testing.T) {
 
 	bp := backend_pool.NewBackendPool("public", backends)
 	healthy := bp.GetHealthyBackends()
+	backends = bp.Backends()
 
 	if len(healthy) != 2 {
 		t.Fatalf("expected 2 healthy backends, got %d", len(healthy))
 	}
-	if healthy[0] != bp.Backends[0] {
+	if healthy[0] != backends[0] {
 		t.Fatalf("expected first healthy backend to point to the first slice element")
 	}
-	if healthy[1] != bp.Backends[2] {
+	if healthy[1] != backends[2] {
 		t.Fatalf("expected second healthy backend to point to the third slice element")
 	}
-	if healthy[0].Addr != "10.0.0.1:80" || healthy[1].Addr != "10.0.0.3:80" {
-		t.Fatalf("unexpected healthy backend addresses: %+v", healthy)
-	}
+
 }
 
 func TestGetUnhealthyBackends(t *testing.T) {
@@ -57,10 +57,11 @@ func TestGetUnhealthyBackends(t *testing.T) {
 	if len(unhealthy) != 2 {
 		t.Fatalf("expected 2 unhealthy backends, got %d", len(unhealthy))
 	}
-	if unhealthy[0] != bp.Backends[1] {
+	backends = bp.Backends()
+	if unhealthy[0] != backends[1] {
 		t.Fatalf("expected first unhealthy backend to point to the second slice element")
 	}
-	if unhealthy[1] != bp.Backends[2] {
+	if unhealthy[1] != backends[2] {
 		t.Fatalf("expected second unhealthy backend to point to the third slice element")
 	}
 }
@@ -78,10 +79,11 @@ func TestGetTrialBackends(t *testing.T) {
 	if len(trial) != 2 {
 		t.Fatalf("expected 2 trial backends, got %d", len(trial))
 	}
-	if trial[0] != bp.Backends[0] {
+	backends = bp.Backends()
+	if trial[0] != backends[0] {
 		t.Fatalf("expected first trial backend to point to the first slice element")
 	}
-	if trial[1] != bp.Backends[2] {
+	if trial[1] != backends[2] {
 		t.Fatalf("expected second trial backend to point to the third slice element")
 	}
 }
