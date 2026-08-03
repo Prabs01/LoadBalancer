@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"loadbalancer/configs"
@@ -61,7 +61,40 @@ func TestLoadConfig_ReturnsErrorWhenFileMissing(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for missing config file")
 	}
-	if !os.IsNotExist(err) && !os.IsNotExist(os.ErrNotExist) {
-		t.Fatalf("expected not-exist error, got %v", err)
+	if !strings.Contains(err.Error(), "no such file or directory") {
+		t.Fatalf("expected missing-file error, got %v", err)
+	}
+}
+
+func TestLoadConfig_ValidationErrors(t *testing.T) {
+	tests := []struct {
+		name    string
+		file    string
+		wantErr string
+	}{
+		{
+			name:    "missing pool reference",
+			file:    "invalid_missing_pool.yaml",
+			wantErr: "route references non-existent pool",
+		},
+		{
+			name:    "negative timeout",
+			file:    "invalid_timeout.yaml",
+			wantErr: "timeout values must be non-negative",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			configPath := filepath.Join("testdata", tc.file)
+
+			_, err := configs.NewConfigManager(configPath).LoadConfig()
+			if err == nil {
+				t.Fatalf("expected validation error for %s", tc.file)
+			}
+			if !strings.Contains(err.Error(), tc.wantErr) {
+				t.Fatalf("expected error containing %q, got %v", tc.wantErr, err)
+			}
+		})
 	}
 }

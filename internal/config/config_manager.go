@@ -1,4 +1,4 @@
-package configs
+package config
 
 import (
 	"fmt"
@@ -77,7 +77,51 @@ func (cm *ConfigManager) LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %v", err)
 	}
 
+	validationErr := validateConfig(config)
+	if validationErr != nil {
+		log.Printf("Config validation error: %v", validationErr)
+		return nil, fmt.Errorf("config validation failed: %v", validationErr)
+	}		
+
 	log.Printf("Config loaded successfully: %+v", config)
 
 	return config, nil
+}
+
+func validateConfig(config *Config) error {
+
+	addrSet := make(map[string]struct{})
+	for _, pools := range config.Pools {
+		for _, pool := range pools {
+			//all weights must be positive integers
+			if pool.Weight <= 0 {
+				log.Printf("Invalid weight %d for pool %s", pool.Weight, pool.Addr)
+				return fmt.Errorf("invalid weight %d for pool %s", pool.Weight, pool.Addr)
+			}
+			//check for duplicate addresses
+			if _, exists := addrSet[pool.Addr]; exists {
+				log.Printf("Duplicate address %s found in pools", pool.Addr)
+				return fmt.Errorf("duplicate address %s found in pools", pool.Addr)
+			}
+			addrSet[pool.Addr] = struct{}{}
+		}
+	}
+
+	//every route must reference a valid pool
+	for _, route := range config.Routes {
+		if _, exists := config.Pools[route.Pool]; !exists {
+			log.Printf("Route references non-existent pool %s", route.Pool)
+			return fmt.Errorf("route references non-existent pool %s", route.Pool)
+		}
+	}
+
+	//timeout values must be valid
+	if config.Timeout.Read < 0 || config.Timeout.Dial < 0 || config.Timeout.Write < 0 || config.Timeout.Idle < 0 {
+		log.Printf("Invalid timeout values found")
+		return fmt.Errorf("timeout values must be non-negative")
+	}
+
+
+	return nil	
+
 }
