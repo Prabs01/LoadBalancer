@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"loadbalancer/configs"
+	"loadbalancer/internal/config"
 )
 
 func TestLoadConfig_LoadsExpectedValues(t *testing.T) {
 	configPath := filepath.Join("testdata", "config.yaml")
 
-	cfg, err := configs.NewConfigManager(configPath).LoadConfig()
+	cfg, err := config.NewConfigManager(configPath).LoadConfig()
 	if err != nil {
 		t.Fatalf("LoadConfig returned error: %v", err)
 	}
@@ -57,7 +57,7 @@ func TestLoadConfig_LoadsExpectedValues(t *testing.T) {
 func TestLoadConfig_ReturnsErrorWhenFileMissing(t *testing.T) {
 	configPath := filepath.Join("testdata", "missing.yaml")
 
-	_, err := configs.NewConfigManager(configPath).LoadConfig()
+	_, err := config.NewConfigManager(configPath).LoadConfig()
 	if err == nil {
 		t.Fatal("expected error for missing config file")
 	}
@@ -88,7 +88,7 @@ func TestLoadConfig_ValidationErrors(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			configPath := filepath.Join("testdata", tc.file)
 
-			_, err := configs.NewConfigManager(configPath).LoadConfig()
+			_, err := config.NewConfigManager(configPath).LoadConfig()
 			if err == nil {
 				t.Fatalf("expected validation error for %s", tc.file)
 			}
