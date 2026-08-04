@@ -6,12 +6,12 @@ import (
 )
 
 type RoundRobinLoadBalancer struct {
-	currentIndex atomic.Int64
+	currentIndex atomic.Uint64
 }
 
 func NewRoundRobinLoadBalancer() *RoundRobinLoadBalancer {
 	return &RoundRobinLoadBalancer{
-		currentIndex: atomic.Int64{},
+		currentIndex: atomic.Uint64{},
 	}
 }
 
@@ -20,7 +20,7 @@ func (rr *RoundRobinLoadBalancer) NextBackend(bp backendmanager.BackendPool) *ba
 	if len(backends) == 0 {
 		return nil
 	}
-	index := rr.currentIndex.Load() % int64(len(backends))
+	index := rr.currentIndex.Load() % uint64(len(backends))
 	backend := backends[index]
 	rr.currentIndex.Add(1)
 	return backend

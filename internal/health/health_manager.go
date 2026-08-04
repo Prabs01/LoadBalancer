@@ -43,7 +43,7 @@ func (hm *HealthManager) RecordFailure(backend_ *backendmanager.Backend) error {
 
 		//cooldown the backend for a specified duration
 		backend_.SetCooldownUntil(time.Now().Add(hm.cooldownTime).UnixNano())
-		
+
 	}else if backend_.GetHealthState() == backendmanager.Trial {
 		backend_.SetHealthState(backendmanager.Unhealthy)
 		backend_.SetCooldownUntil(time.Now().Add(hm.cooldownTime).UnixNano())

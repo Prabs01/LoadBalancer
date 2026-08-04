@@ -4,7 +4,7 @@ import (
 	"sync/atomic"
 )
 
-type HealthState int
+type HealthState uint8
 
 const (
 	Healthy HealthState = iota
@@ -28,7 +28,7 @@ func (hs HealthState) String() string {
 type Backend struct {
 	Addr            string
 	weight          atomic.Int64
-	healthState     HealthState
+	healthState     atomic.Uint32 
 	connectionCount atomic.Int64
 	failureCount    atomic.Int64
 	cooldownUntil   atomic.Int64 // Store as Unix timestamp in nanoseconds
@@ -38,7 +38,7 @@ func NewBackend(addr string, weight int, healthState HealthState) *Backend {
 	var backend Backend
 	backend.Addr = addr
 	backend.weight.Store(int64(weight))
-	backend.healthState = healthState
+	backend.healthState.Store(uint32(healthState))
 	backend.connectionCount.Store(0)
 	backend.failureCount.Store(0)
 	backend.cooldownUntil.Store(0)
@@ -54,15 +54,23 @@ func (b *Backend) SetWeight(weight int) {
 }
 
 func (b *Backend) GetHealthState() HealthState {
-	return b.healthState
+	return HealthState(b.healthState.Load())
 }
 
 func (b *Backend) SetHealthState(state HealthState) {
-	b.healthState = state
+	b.healthState.Store(uint32(state))
 }
 
 func (b *Backend) IsHealthy() bool {
-	return b.healthState == Healthy
+	return b.healthState.Load() == uint32(Healthy)
+}
+
+func (b *Backend) IsTrial() bool {
+	return b.healthState.Load() == uint32(Trial)
+}
+
+func (b *Backend) IsUnhealthy() bool {
+	return b.healthState.Load() == uint32(Unhealthy)
 }
 
 func (b *Backend) IncrementConnectionCount() {
