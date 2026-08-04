@@ -1,9 +1,9 @@
 package loadbalancer
 
 import (
-	backendpool "loadbalancer/internal/backend_pool"
+	"loadbalancer/internal/backendmanager"
 )
 
 type LoadBalancer interface {
-	NextBackend(*backendpool.BackendPool) *backendpool.Backend
+	NextBackend(*backendmanager.BackendPool) *backendmanager.Backend
 }

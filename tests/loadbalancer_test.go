@@ -3,16 +3,16 @@ package tests
 import (
 	"testing"
 
+	"loadbalancer/internal/backendmanager"
 	lb "loadbalancer/internal/loadbalancer"
-	backendpool "loadbalancer/internal/backend_pool"
 )
 
 // simple round-robin implementation used only for testing
-type rrLB struct{
+type rrLB struct {
 	last int
 }
 
-func (r *rrLB) NextBackend(pool *backendpool.BackendPool) *backendpool.Backend {
+func (r *rrLB) NextBackend(pool *backendmanager.BackendPool) *backendmanager.Backend {
 	if pool.PoolSize() == 0 {
 		return nil
 	}
@@ -26,12 +26,12 @@ func TestRRImplementsInterface(t *testing.T) {
 
 func TestRRSelectionOrder(t *testing.T) {
 
-	backends := []*backendpool.Backend{
-		backendpool.NewBackend("a:1", 1, 0),
-		backendpool.NewBackend("b:2", 1, 0),
-		backendpool.NewBackend("c:3", 1, 0),
+	backends := []*backendmanager.Backend{
+		backendmanager.NewBackend("a:1", 1, backendmanager.Healthy),
+		backendmanager.NewBackend("b:2", 1, backendmanager.Healthy),
+		backendmanager.NewBackend("c:3", 1, backendmanager.Healthy),
 	}
-	pool := backendpool.NewBackendPool("test", backends)
+	pool := backendmanager.NewBackendPool("test", backends)
 
 	rl := &rrLB{last: -1}
 

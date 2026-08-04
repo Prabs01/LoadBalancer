@@ -1,7 +1,7 @@
 package loadbalancer
 
 import (
-	"loadbalancer/internal/backend_pool"
+	"loadbalancer/internal/backendmanager"
 )
 
 type LeastConnectionLoadBalancer struct {
@@ -11,13 +11,13 @@ func NewLeastConnectionLoadBalancer() *LeastConnectionLoadBalancer {
 	return &LeastConnectionLoadBalancer{}
 }
 
-func (lc *LeastConnectionLoadBalancer) NextBackend(bp backend_pool.BackendPool) *backend_pool.Backend {
+func (lc *LeastConnectionLoadBalancer) NextBackend(bp backendmanager.BackendPool) *backendmanager.Backend {
 	backends := bp.Backends()
 	if len(backends) == 0 {
 		return nil
 	}
 
-	var leastConnBackend *backend_pool.Backend
+	var leastConnBackend *backendmanager.Backend
 	for _, backend := range backends {
 		if leastConnBackend == nil || backend.GetConnectionCount() < leastConnBackend.GetConnectionCount() {
 			leastConnBackend = backend

@@ -1,14 +1,13 @@
 package tests
 
 import (
-	"loadbalancer/internal/backend_pool"
-	"loadbalancer/internal/health"
+	"loadbalancer/internal/backendmanager"
 	"testing"
 )
 
 func TestNewBackendPool(t *testing.T) {
-	backends := []*backend_pool.Backend{backend_pool.NewBackend("10.0.0.1:80", 1, health.Healthy)}
-	bp := backend_pool.NewBackendPool("public", backends)
+	backends := []*backendmanager.Backend{backendmanager.NewBackend("10.0.0.1:80", 1, backendmanager.Healthy)}
+	bp := backendmanager.NewBackendPool("public", backends)
 	if bp.Name != "public" {
 		t.Fatalf("expected name public, got %q", bp.Name)
 	}
@@ -22,13 +21,13 @@ func TestNewBackendPool(t *testing.T) {
 }
 
 func TestGetHealthyBackends(t *testing.T) {
-	backends := []*backend_pool.Backend{
-		backend_pool.NewBackend("10.0.0.1:80", 1, health.Healthy),
-		backend_pool.NewBackend("10.0.0.2:80", 1, health.Unhealthy),
-		backend_pool.NewBackend("10.0.0.3:80", 1, health.Healthy),
+	backends := []*backendmanager.Backend{
+		backendmanager.NewBackend("10.0.0.1:80", 1, backendmanager.Healthy),
+		backendmanager.NewBackend("10.0.0.2:80", 1, backendmanager.Unhealthy),
+		backendmanager.NewBackend("10.0.0.3:80", 1, backendmanager.Healthy),
 	}
 
-	bp := backend_pool.NewBackendPool("public", backends)
+	bp := backendmanager.NewBackendPool("public", backends)
 	healthy := bp.GetHealthyBackends()
 	backends = bp.Backends()
 
@@ -45,13 +44,13 @@ func TestGetHealthyBackends(t *testing.T) {
 }
 
 func TestGetUnhealthyBackends(t *testing.T) {
-	backends := []*backend_pool.Backend{
-		backend_pool.NewBackend("10.0.0.1:80", 1, health.Healthy),
-		backend_pool.NewBackend("10.0.0.2:80", 1, health.Unhealthy),
-		backend_pool.NewBackend("10.0.0.3:80", 1, health.Unhealthy),
+	backends := []*backendmanager.Backend{
+		backendmanager.NewBackend("10.0.0.1:80", 1, backendmanager.Healthy),
+		backendmanager.NewBackend("10.0.0.2:80", 1, backendmanager.Unhealthy),
+		backendmanager.NewBackend("10.0.0.3:80", 1, backendmanager.Unhealthy),
 	}
 
-	bp := backend_pool.NewBackendPool("public", backends)
+	bp := backendmanager.NewBackendPool("public", backends)
 	unhealthy := bp.GetUnhealthyBackends()
 
 	if len(unhealthy) != 2 {
@@ -67,13 +66,13 @@ func TestGetUnhealthyBackends(t *testing.T) {
 }
 
 func TestGetTrialBackends(t *testing.T) {
-	backends := []*backend_pool.Backend{
-		backend_pool.NewBackend("10.0.0.1:80", 1, health.Trial),
-		backend_pool.NewBackend("10.0.0.2:80", 1, health.Healthy),
-		backend_pool.NewBackend("10.0.0.3:80", 1, health.Trial),
+	backends := []*backendmanager.Backend{
+		backendmanager.NewBackend("10.0.0.1:80", 1, backendmanager.Trial),
+		backendmanager.NewBackend("10.0.0.2:80", 1, backendmanager.Healthy),
+		backendmanager.NewBackend("10.0.0.3:80", 1, backendmanager.Trial),
 	}
 
-	bp := backend_pool.NewBackendPool("public", backends)
+	bp := backendmanager.NewBackendPool("public", backends)
 	trial := bp.GetTrialBackends()
 
 	if len(trial) != 2 {
@@ -89,12 +88,12 @@ func TestGetTrialBackends(t *testing.T) {
 }
 
 func TestGetConnectionCounts(t *testing.T) {
-	backends := []*backend_pool.Backend{
-		backend_pool.NewBackend("10.0.0.1:80", 1, health.Healthy),
-		backend_pool.NewBackend("10.0.0.2:80", 1, health.Healthy),
+	backends := []*backendmanager.Backend{
+		backendmanager.NewBackend("10.0.0.1:80", 1, backendmanager.Healthy),
+		backendmanager.NewBackend("10.0.0.2:80", 1, backendmanager.Healthy),
 	}
 
-	bp := backend_pool.NewBackendPool("public", backends)
+	bp := backendmanager.NewBackendPool("public", backends)
 	counts := bp.GetConnectionCounts()
 
 	if len(counts) != 2 {

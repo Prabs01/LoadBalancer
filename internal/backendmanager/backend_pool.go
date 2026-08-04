@@ -1,8 +1,4 @@
-package backend_pool
-
-import (
-	"loadbalancer/internal/health"
-)
+package backendmanager
 
 type BackendPool struct {
 	Name     string
@@ -21,7 +17,7 @@ func (bp *BackendPool) PoolSize() int {
 func (bp *BackendPool) GetHealthyBackends() []*Backend {
 	var healthyBackends []*Backend
 	for i := range bp.backends {
-		if bp.backends[i].healthState == health.Healthy {
+		if bp.backends[i].healthState == Healthy {
 			healthyBackends = append(healthyBackends, bp.backends[i])
 		}
 	}
@@ -31,7 +27,7 @@ func (bp *BackendPool) GetHealthyBackends() []*Backend {
 func (bp *BackendPool) GetUnhealthyBackends() []*Backend {
 	var unhealthyBackends []*Backend
 	for i := range bp.backends {
-		if bp.backends[i].healthState == health.Unhealthy {
+		if bp.backends[i].healthState == Unhealthy {
 			unhealthyBackends = append(unhealthyBackends, bp.backends[i])
 		}
 	}
@@ -41,7 +37,7 @@ func (bp *BackendPool) GetUnhealthyBackends() []*Backend {
 func (bp *BackendPool) GetTrialBackends() []*Backend {
 	var trialBackends []*Backend
 	for i := range bp.backends {
-		if bp.backends[i].healthState == health.Trial {
+		if bp.backends[i].healthState == Trial {
 			trialBackends = append(trialBackends, bp.backends[i])
 		}
 	}
@@ -56,7 +52,6 @@ func (bp *BackendPool) GetConnectionCounts() map[string]int {
 	return connectionCounts
 }
 
-
 func NewBackendPool(name string, backends []*Backend) *BackendPool {
 	return &BackendPool{
 		Name:     name,
@@ -64,5 +59,3 @@ func NewBackendPool(name string, backends []*Backend) *BackendPool {
 		poolSize: len(backends),
 	}
 }
-
-
